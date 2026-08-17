@@ -1,0 +1,25 @@
+name: Save Ray Image Offline
+on:
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull official Ray image
+        run: |
+          # 如果拉取失败，请检查 Tag 是否正确（见下方提示）
+          docker pull rayproject/ray:2.52.0
+          
+      - name: Save and heavily compress image
+        run: |
+          # 使用 gzip 压缩，通常能把 2GB 的镜像压缩到 800MB 左右
+          docker save rayproject/ray:2.52.0 | gzip > ray-2.52.0.tar.gz
+          ls -lh ray-2.52.0.tar.gz
+          
+      - name: Upload to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ray-2.52.0-offline
+          path: ray-2.52.0.tar.gz
+          retention-days: 3 # 大文件保留3天即可，防止占满免费额度
