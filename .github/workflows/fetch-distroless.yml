@@ -1,0 +1,24 @@
+name: Fetch Distroless Static Nonroot
+on:
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. 拉取 gcr.io 镜像
+        run: |
+          echo "正在从 Google Container Registry 拉取镜像..."
+          docker pull gcr.io/distroless/static:nonroot
+          
+      - name: 2. 打包并压缩
+        run: |
+          docker save gcr.io/distroless/static:nonroot | gzip > distroless-static-nonroot.tar.gz
+          ls -lh distroless-static-nonroot.tar.gz
+          
+      - name: 3. 上传至 Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: distroless-offline
+          path: distroless-static-nonroot.tar.gz
+          retention-days: 3
